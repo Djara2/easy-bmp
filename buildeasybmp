@@ -1,0 +1,8 @@
+#!/usr/bin/env bash 
+echo -n "Compiling easybmp... "
+# if gcc -c libeasybmp.c -o libeasybmp.o -Wall -Wextra -Wconversion -Wunreachable-code ; then   
+if gcc easybmp.c libeasybmp.o -o easybmp ; then   
+	echo "Success!"
+else
+	echo "Compiling easybmp failed."
+fi

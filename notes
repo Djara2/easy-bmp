@@ -1,0 +1,96 @@
+Functions
+
+- put a pixel at an offset
+- put a pixel at a row and column
+- draw a line
+                                              
+
+                              765432|10|
+                              ---------|
+0  00000000 00000000 00000000 000000|00| ❌
+1  00000000 00000000 00000000 000000|01| ❌
+2  00000000 00000000 00000000 000000|10| ❌
+3  00000000 00000000 00000000 000000|11| ❌
+4  00000000 00000000 00000000 000001|00| ✅
+5  00000000 00000000 00000000 000001|01| ❌
+6  00000000 00000000 00000000 000001|10| ❌
+7  00000000 00000000 00000000 000001|11| ❌
+8  00000000 00000000 00000000 000010|00| ✅
+9  00000000 00000000 00000000 000010|01| ❌
+10 00000000 00000000 00000000 000010|10| ❌
+11 00000000 00000000 00000000 000010|11| ❌
+12 00000000 00000000 00000000 000011|00| ✅
+13 00000000 00000000 00000000 000011|01| ❌
+14 00000000 00000000 00000000 000011|10| ❌
+15 00000000 00000000 00000000 000011|11| ❌
+16 00000000 00000000 00000000 000100|00| ✅
+32 00000000 00000000 00000000 001000|00| ✅
+
+
+Bit masking
+M  00000000 00000000 00000000 000000|11| 
+----------------------------------------
+5  00000000 00000000 00000000 000001|01| 01 
+6  00000000 00000000 00000000 000001|10| 10
+7  00000000 00000000 00000000 000001|11| 11
+8  00000000 00000000 00000000 000010|00| 00
+
+if (width == 0) return NULL;
+-----
+// Padding required
+if (width & 0x3) {
+	-
+	-
+	- 
+}
+
+xx
+xx 12 bytes
+(rgb)(rgb) 
+(rgb)(rgb)
+
+1        2        3          4        5        6 
+11111111 11111111 11111111 | 11111111 11111111 11111111
+11111111 11111111 11111111 | 11111111 11111111 11111111
+
+xxxxx000
+xxxxx000
+xxxxx000
+xxxxx000
+xxxxx000
+
+width = 5
+width + 4 - 1 = 5 + 4 - 1 = 8
+
+3 * adjusted width * height 
+= 3 * 8 * 5 = 24 * 5 = 120
+
+4|50 not true 
+150 bytes
+
+width = 50 --> "we need 2 more bytes" WRONG, we need 2 more pixels
+
+width in bytes = width * 3 = 150 , "we need 6 more bytes" GOOD
+
+50 + 4 - 2 = 50 + 2 = 52
+
+150 (2 bytes over)
+
+width_in_bytes + 4 - bytes_over_previous_alignment
+
+ALREADY HAVE: width
+
+- width_in_bytes_without_padding size_t
+- width_in_bytes_with_padding    size_t
+- padding_per_scan_line_in_bytes uint8_t
+
+30 & 0x3 = 2
+4 - (30 & 0x3) = 4 - 2 = 2
+
+pixel_data[0 * bmp.width_in_bytes_with_padding] = first byte of the first pixel in the first scanline (bottom scanline)
+pixel_data[bmp.width_in_bytes_with_padding - 1] = the last byte of the last pixel in the first scanline
+
+pixel_data[bmp.width_in_bytes_with_padding] = the first byte of the first pixel in the second scanline from the bottom
+ 
+
+
