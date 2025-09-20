@@ -4,14 +4,15 @@
 #include <stdio.h>
 #ifndef LIBEASYBMP_H 
 #define LIBEASYBMP_H
-enum Direction {
+enum {
 	DIRECTION_HORIZONTAL,
 	DIRECTION_VERTICAL	
 };
 
 enum EasyBMPStatus { 
 	STATUS_OK,
-	STATUS_FAILED
+	STATUS_FAILED,
+	STATUS_LINE_ENDS_AT_BOUNDARY
 };
 
 struct BMP {
@@ -40,19 +41,19 @@ struct BMP {
 	uint8_t *pixel_data;		//				8	8
 	
 	// Stuff to help me
-	size_t width_in_bytes_without_padding;	//			8 	8
-	size_t width_in_bytes_with_padding;	//			8	16
+	size_t width_in_bytes_without_padding;	 	//		8 	8
+	size_t width_in_bytes_with_padding;		//		8	16
 };
 
 enum EasyBMPStatus bmp_init(struct BMP *bmp, uint32_t width, uint32_t height);
 
 uint8_t* bmp_get_scanline(struct BMP *bmp, uint32_t scanline);
 
-size_t bmp_put_pixel(struct BMP *bmp, size_t offset, uint8_t red, uint8_t green, uint8_t blue);
+uint8_t* bmp_put_pixel(struct BMP *bmp, size_t offset, uint8_t red, uint8_t green, uint8_t blue);
 
 uint8_t* bmp_put_pixel_at_coordinate(struct BMP *bmp, uint32_t scanline, uint32_t column, uint8_t red, uint8_t green, uint8_t blue);
 
-size_t bmp_draw_line(struct BMP *bmp, enum Direction direction, uint32_t row, uint32_t column, uint8_t red, uint8_t green, uint8_t blue);
+uint8_t* bmp_draw_line(struct BMP *bmp, enum EasyBMPStatus *status, uint32_t x1, uint32_t x2, uint32_t y1, uint32_t y2, uint8_t red, uint8_t green, uint8_t blue);
 
 size_t bmp_write_to_file(struct BMP *bmp, FILE *fd);
 #endif

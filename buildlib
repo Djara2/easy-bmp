@@ -1,8 +1,0 @@
-#!/usr/bin/env bash 
-echo -n "Compiling libeasybmp..."
-# if gcc -c libeasybmp.c -o libeasybmp.o -Wall -Wextra -Wconversion -Wunreachable-code ; then   
-if gcc -c libeasybmp.c -o libeasybmp.o ; then   
-	echo "Success!"
-else
-	echo "Compiling libeasybmp failed."
-fi

@@ -32,6 +32,8 @@ int main(void) {
 	scanline[6] = 0;
 	scanline[7] = 0; 
 	*/  
+
+	/* 
 	// Write big 256x256 BMP (all red) 
 	for (uint32_t i = 0; i < 256; i++) { 		// scanline iterator
 		for (uint32_t j = 0; j < 256; j++) {    // column iterator  
@@ -40,11 +42,37 @@ int main(void) {
 			bmp_put_pixel_at_coordinate(&bmp, i, j, 255, 0, 0); 	
 		}
 	}
+	*/
+	enum EasyBMPStatus status = STATUS_OK;
+	// Draw a black border at the bottom
+	for (uint32_t i = 0; i < 10; i++) {
+		bmp_draw_line(&bmp, &status, 0, 255, i, i, 95, 118, 139);
+	}
+
+	// Draw a black border at the top 
+	for (uint32_t i = 245; i <= 255; i++) {
+		bmp_draw_line(&bmp, &status, 0, 255, i, i, 95, 118, 139);
+	}
+
+	// Draw black border on the left
+	for (uint32_t i = 0; i < 10; i++) {
+		bmp_draw_line(&bmp, &status, i, i, 0, 255, 95, 118, 139);
+	}
+
+	// Draw black border on the right 
+	for (uint32_t i = 245; i <= 255; i++) {
+		bmp_draw_line(&bmp, &status, i, i, 0, 255, 95, 118, 139);
+	}
+
+	// Draw light blue (?) square inside boundary
+	for (uint32_t i = 10; i < 245; i++) {
+		bmp_draw_line(&bmp, &status, 10, 245, i, i, 159, 197, 232);
+	}
 	
 	// Write to file
-	FILE *fd = fopen("big_example.bmp", "wb");
+	FILE *fd = fopen("line_example.bmp", "wb");
 	if (fd == NULL) {
-		fprintf(stderr, "Failed to obtain file descriptor for \"big_example.bmp\".\n");
+		fprintf(stderr, "Failed to obtain file descriptor for \"line_example.bmp\".\n");
 		free(bmp.pixel_data);
 		return 1;
 	}

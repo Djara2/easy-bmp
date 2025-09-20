@@ -1,0 +1,102 @@
+#!/usr/bin/env bash 
+current_argument=0
+target="none"
+lazy="off"
+
+usage() {
+	echo "Usage: build [ -t | --target ] TARGET"
+	echo "             [ -l | --lazy   ] [ on | off ]"
+	exit 2
+}
+
+compile_libeasybmp() {
+	if [ "$lazy" == "off" ] ; then
+		echo -n "Compiling libeasybmp... "
+		if gcc -c libeasybmp.c -o libeasybmp.o -Wall -Wextra -Wconversion -Wunreachable-code ; then    
+			echo "Success!"
+		else
+			echo "Compiling libeasybmp failed." 
+		fi
+	elif [ "$lazy" == "on" ] ; then
+		echo -n "Compiling libeasybmp lazily... "
+		if gcc -c libeasybmp.c -o libeasybmp.o ; then
+			echo "Success!"
+		else
+			echo "Compiling libeasybmp failed."
+		fi
+	else
+		usage
+	fi
+}
+
+compile_easybmp() {
+	if [ "$lazy" == "off" ] ; then
+		echo -n "Compiling easybmp... "
+		if gcc easybmp.c libeasybmp.o -o easybmp -Wall -Wextra -Wconversion -Wunreachable-code ; then   
+			echo "Success!"
+		else
+			echo "Compiling easybmp failed."  
+		fi
+	elif [ "$lazy" == "on" ] ; then	 
+		echo -n "Compiling easybmp lazily... "
+		if gcc easybmp.c libeasybmp.o -o easybmp ; then   
+			echo "Success!" 
+		else 
+			echo "Compiling easybmp failed."
+		fi
+	else
+		usage
+	fi
+}
+
+for argument in "$@"
+do
+	case "$argument" in
+		"-t" | "--target") 
+			current_argument=1
+			;; 
+		
+		"-l" | "--lazy") 
+			current_argument=2
+			;;
+
+		*)
+			case $current_argument in 
+				0)
+					usage
+					;;
+
+				1)
+					target="$argument"					
+					;;
+
+				2)
+					lazy="$argument"
+					;;
+
+				*)
+					usage
+					;;
+			esac
+			;;
+	esac
+done
+
+case "$target" in
+	"lib" | "libeasybmp")
+		compile_libeasybmp
+		;;
+	
+	"runner" | "driver" | "easybmp")  
+		compile_easybmp
+		;;
+	
+	"all" | "*") 
+		compile_libeasybmp
+		compile_easybmp
+		;;
+
+	*) 
+		usage 
+		;;
+esac

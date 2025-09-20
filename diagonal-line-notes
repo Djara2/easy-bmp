@@ -1,0 +1,23 @@
+x1 = 10 
+x2 = 32
+
+length = 22
+
+pixel_offset = 0
+for (i = x1; i < x2; i++) {
+	pixel_offset = 3 * i; 	-> 33
+	scanline_ptr[pixel_offset] = blue;
+	scanline_ptr[pixel_offset + 1] = green
+	scanline_ptr[pixel_offset + 2] = red;
+}
+
+
+y = mx + b
+
+=> b = y - mx
+
+=> b = y1 - mx1
+
+anti-aliased pixels become darker if on range [128, 255] 
+anti-aliased pixels become lighter if on range [0, 127]
+
