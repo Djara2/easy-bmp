@@ -46,33 +46,38 @@ int main(void) {
 	enum EasyBMPStatus status = STATUS_OK;
 	// Draw a black border at the bottom
 	for (uint32_t i = 0; i < 10; i++) {
-		bmp_draw_line(&bmp, &status, 0, 255, i, i, 95, 118, 139);
+		bmp_draw_line(&bmp, &status, 0, i, 255, i, 95, 118, 139);
 	}
 
 	// Draw a black border at the top 
 	for (uint32_t i = 245; i <= 255; i++) {
-		bmp_draw_line(&bmp, &status, 0, 255, i, i, 95, 118, 139);
+		bmp_draw_line(&bmp, &status, 0, i, 255, i, 95, 118, 139);
 	}
 
 	// Draw black border on the left
 	for (uint32_t i = 0; i < 10; i++) {
-		bmp_draw_line(&bmp, &status, i, i, 0, 255, 95, 118, 139);
+		bmp_draw_line(&bmp, &status, i, 0, i, 255, 95, 118, 139);
 	}
 
 	// Draw black border on the right 
 	for (uint32_t i = 245; i <= 255; i++) {
-		bmp_draw_line(&bmp, &status, i, i, 0, 255, 95, 118, 139);
+		bmp_draw_line(&bmp, &status, i, 0, i, 255, 95, 118, 139);
 	}
 
 	// Draw light blue (?) square inside boundary
-	for (uint32_t i = 10; i < 245; i++) {
-		bmp_draw_line(&bmp, &status, 10, 245, i, i, 159, 197, 232);
-	}
+	for (uint32_t i = 10; i < 245; i++) 
+		bmp_draw_line(&bmp, &status, 10, i, 245, i, 159, 197, 232);
 	
+	// Draw diagonal lines inside the square (X pattern)
+	bmp_draw_line(&bmp, &status, 10, 10, 244, 244, 255, 255, 255);
+	bmp_draw_line(&bmp, &status, 10, 244, 244, 10, 255, 255, 255);
+	
+	bmp_draw_line(&bmp, &status, 10, 10,   117, 244, 0, 0, 0);
+	bmp_draw_line(&bmp, &status, 244, 10,  117,  244, 0, 0, 0);
 	// Write to file
-	FILE *fd = fopen("line_example.bmp", "wb");
+	FILE *fd = fopen("diagonal_line_example.bmp", "wb");
 	if (fd == NULL) {
-		fprintf(stderr, "Failed to obtain file descriptor for \"line_example.bmp\".\n");
+		fprintf(stderr, "Failed to obtain file descriptor for \"diagnonal_line_example.bmp\".\n");
 		free(bmp.pixel_data);
 		return 1;
 	}

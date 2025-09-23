@@ -124,7 +124,7 @@ uint8_t* bmp_put_pixel_at_coordinate(struct BMP *bmp, uint32_t scanline, uint32_
 // Status field helps to disambiguate a NULL pointer return type.
 // 					                            start 	 end          start        end
 //					                            column	 column	      scanline     scanline                                      
-uint8_t* bmp_draw_line(struct BMP *bmp, enum EasyBMPStatus *status, uint32_t x1, uint32_t x2, uint32_t y1, uint32_t y2, uint8_t red, uint8_t green, uint8_t blue) { 
+uint8_t* bmp_draw_line(struct BMP *bmp, enum EasyBMPStatus *status, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2, uint8_t red, uint8_t green, uint8_t blue) { 
 	if (bmp == NULL) {
 		fprintf(stderr, "[Error][bmp_draw_line] BMP struct pointer points to NULL.\n");
 		return NULL;
@@ -154,23 +154,25 @@ uint8_t* bmp_draw_line(struct BMP *bmp, enum EasyBMPStatus *status, uint32_t x1,
 		return NULL;
 	}
 
+	// Force start coordinates to be lesser than end coordinates
+	uint32_t swap = 0;
+	size_t pixel_offset = 0;
+
 	// Get line origin point
 	uint8_t *scanline_ptr = bmp->pixel_data + (y1 * bmp->width_in_bytes_with_padding);
 	if (scanline_ptr == NULL) {
 		fprintf(stderr, "[Error][bmp_draw_line] Scanline pointer for scanline %u points to NULL.\n", y1);
 		return NULL;
 	}
-	
-	uint32_t swap = 0;
-	size_t pixel_offset = 0;
+
 	// Case: horizontal line 
-	if (y1 == y2) {
+	if (y1 == y2) {		
 		if (x1 > x2) { 
 			swap = x2;
 			x2 = x1;
 			x1 = swap;
 		}
-		
+
 		for (uint32_t i = x1; i <= x2; i++) {
 			pixel_offset = 3 * i;	
 			scanline_ptr[pixel_offset]     = blue;
@@ -191,13 +193,12 @@ uint8_t* bmp_draw_line(struct BMP *bmp, enum EasyBMPStatus *status, uint32_t x1,
 	}
 
 	// Case: vertical line 
-	else if (x1 == x2) {
+	else if (x1 == x2) {		
 		if (y1 > y2) {
 			swap = y2;
 			y2 = y1;
 			y1 = swap;
-		}
-		
+		} 
 		// Pixel offset is constant since we are navigating up the scanlines, not across.
 		pixel_offset = 3 * x1;
 		// Set RGB of pixels (remember BGR order) for first relevant scanline.
@@ -231,25 +232,86 @@ uint8_t* bmp_draw_line(struct BMP *bmp, enum EasyBMPStatus *status, uint32_t x1,
 		return scanline_ptr;
 	}
 
-	// Case: diagonal line (UNFINISHED)
+	// Case: diagonal line
 	else {
-		if (x1 > x2) {
-			swap = x2;
-			x2 = x1;
-			x1 = swap;
+		int32_t dx = (int32_t) x2 - (int32_t) x1;
+		int32_t dy = (int32_t) y2 - (int32_t) y1;
+		int32_t  D = 0;
+		int8_t   direction = 1;
+		// Line is mostly horizontal (broad)
+		if (dx >= dy) {
+			direction = dy < 0 ? -1 : 1;
+			dy *= direction;
+
+			uint32_t y = y1;
+			D = (2*dy) - dx;
+			for (uint32_t i = x1; i <= x2; i++) { 
+				// Plot the pixel
+				scanline_ptr = bmp->pixel_data + (y * bmp->width_in_bytes_with_padding);
+				pixel_offset = 3 * i;
+				scanline_ptr[pixel_offset]     = blue;
+				scanline_ptr[pixel_offset + 1] = green;
+				scanline_ptr[pixel_offset + 2] = red;
+
+				// Update decision parameter
+				if (D >= 0) { 
+					y += direction;
+					D = D - (2*dx);
+				}
+				D = D + (2*dy);
+			}
+
+			// Line ended at a row or column boundary
+			if (y2 >= bmp->height - 1) {
+				fprintf(stderr, "[Warning][bmp_draw_line] Line ended at a row boundary, so a NULL pointer is being returned.\n");
+				return NULL;
+			}
+			if (x2 >= bmp->width - 1) {
+				fprintf(stderr, "[Warning][bmp_draw_line] Line ended at a column boundary, so a NULL pointer is being returned.\n");
+				return NULL;
+			}
+			
+			// Return pointer to where the next pixel would be drawn if the line continued.
+			scanline_ptr = bmp->pixel_data + ((y2 + direction) * bmp->width_in_bytes_with_padding);
+			pixel_offset = 3 * (x2 + 1);
+			return scanline_ptr + pixel_offset;
 		}
-		
-		// PRE-EMPTIVE RETURN BECAUSE SECTION IS UNFINISHED
-		return NULL;
-		double slope = (y2 - y1)/(x2 - x1); 
-		double y = 0;
-		double y_floor = 0;
-		double y_ceil = 0;
-		double b = y1 - (slope * x1);
-		for (uint32_t x = x1; x <= x2; x++) {
-			y = slope * x + b;
-			y_floor = floor(y);
-			y_ceil  = ceil(y);
+
+		// Line is mostly vertical (steep slope)
+		else {
+			direction = dx < 0 ? -1 : 1;
+			dx *= direction;
+			
+			uint32_t x = x1;
+			D = (2*dx) - dy;
+			for (uint32_t i = y1; i <= y2; i++) {
+				// Plot the pixel 
+				scanline_ptr = bmp->pixel_data + (i * bmp->width_in_bytes_with_padding);
+				pixel_offset = 3 * x;
+				scanline_ptr[pixel_offset]     = blue;
+				scanline_ptr[pixel_offset + 1] = green;
+				scanline_ptr[pixel_offset + 2] = red;
+				if (D >= 0) {
+					x += direction;
+					D = D - (2*dy);
+				}
+				D = D + (2*dx);
+			}
+			// Line ended at a row or column boundary
+			if (y2 >= bmp->height - 1) {
+				fprintf(stderr, "[Warning][bmp_draw_line] Line ended at a row boundary, so a NULL pointer is being returned.\n");
+				return NULL;
+			}
+			if (x2 >= bmp->width - 1) {
+				fprintf(stderr, "[Warning][bmp_draw_line] Line ended at a column boundary, so a NULL pointer is being returned.\n");
+				return NULL;
+			}
+			
+			// Return pointer to where the next pixel would be drawn if the line continued.
+			scanline_ptr = bmp->pixel_data + ((y2 + 1) * bmp->width_in_bytes_with_padding);
+			pixel_offset = 3 * (x + direction);
+			return scanline_ptr + pixel_offset;
+
 		}
 	}
 }
